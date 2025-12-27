@@ -1,35 +1,8 @@
-// import { useState } from "react";
-
-// export default function RoomSidebar({ roomId, setRoomId }) {
-//   const [newRoom, setNewRoom] = useState("");
-
-//   return (
-//     <div className="w-60 bg-gray-800 p-4">
-//       <h3 className="text-white mb-3">Rooms</h3>
-
-//       <input
-//         placeholder="Enter Room ID"
-//         className="w-full p-2 mb-3 rounded"
-//         onChange={(e) => setNewRoom(e.target.value)}
-//       />
-
-//       <button
-//         onClick={() => setRoomId(newRoom)}
-//         className="bg-green-600 w-full py-2 rounded text-white"
-//       >
-//         Switch Room
-//       </button>
-
-//       <p className="text-gray-400 mt-4">Current: {roomId}</p>
-//     </div>
-//   );
-// }
-
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const API = "http://localhost:5000";
+// const API = "http://localhost:5000";
+const API = "https://chat-back-1-s6lt.onrender.com";
 
 export default function RoomSidebar({ roomId, currentUser, setChatTarget }) {
   const [users, setUsers] = useState([]);

@@ -1,213 +1,107 @@
-// import { useState } from "react";
-// import axios from "axios";
-// import { logoutUser } from "../utils/auth";
-
-// const API = "http://localhost:5000";
-
-// export default function AdminPanel() {
-//   const [form, setForm] = useState({
-//     username: "",
-//     name: "",
-//     password: "",
-//     roomId: "",
-//   });
-
-//   const createUser = async () => {
-//     await axios.post(`${API}/admin/create-user`, form);
-//     alert("User created successfully");
-//   };
-
-//   return (
-//     <div className="h-screen bg-gray-900 flex items-center justify-center">
-//       <div className="bg-gray-800 p-6 rounded w-96">
-//         <h2 className="text-white text-xl mb-4">Admin Panel</h2>
-
-//         {["username", "name", "password", "roomId"].map((field) => (
-//           <input
-//             key={field}
-//             placeholder={field}
-//             className="w-full mb-3 p-2 rounded"
-//             onChange={(e) =>
-//               setForm({ ...form, [field]: e.target.value })
-//             }
-//           />
-//         ))}
-
-//         <button
-//           onClick={createUser}
-//           className="bg-green-600 w-full py-2 rounded text-white"
-//         >
-//           Create User
-//         </button>
-
-//         <button
-//           onClick={() => {
-//             logoutUser();
-//             window.location.reload();
-//           }}
-//           className="bg-red-600 w-full mt-3 py-2 rounded text-white"
-//         >
-//           Logout
-//         </button>
-//       </div>
-//     </div>
-//   );
-// }
-
-
-// import { useEffect, useState } from "react";
-// import axios from "axios";
-
-// const API = "http://localhost:5000";
-
-// export default function AdminPanel({ setUser }) {
-//   const [users, setUsers] = useState([]);
-//   const [form, setForm] = useState({
-//     username: "",
-//     name: "",
-//     password: "",
-//     rooms: "",
-//   });
-
-//   const loadUsers = async () => {
-//     const res = await axios.get(`${API}/admin/users`);
-//     setUsers(res.data);
-//   };
-
-//   useEffect(() => {
-//     loadUsers();
-//   }, []);
-
-//   const createUser = async () => {
-//     await axios.post(`${API}/admin/create-user`, {
-//       ...form,
-//       rooms: form.rooms.split(",").map((r) => r.trim()),
-//     });
-
-//     setForm({ username: "", name: "", password: "", rooms: "" });
-//     loadUsers();
-//   };
-
-//   return (
-//     <div className="h-screen bg-gray-900 p-6 text-white">
-//       <h2 className="text-xl mb-4">Admin Panel</h2>
-
-//       {["username", "name", "password", "rooms"].map((f) => (
-//         <input
-//           key={f}
-//           value={form[f]}
-//           onChange={(e) => setForm({ ...form, [f]: e.target.value })}
-//           placeholder={f}
-//           className="block mb-2 p-2 text-black"
-//         />
-//       ))}
-
-//       <button
-//         onClick={createUser}
-//         className="bg-green-600 px-4 py-2 rounded"
-//       >
-//         Create User
-//       </button>
-
-//       <h3 className="mt-6 mb-2">Users</h3>
-//       {users.map((u) => (
-//         <div key={u.username}>
-//           {u.username} → {u.rooms.join(", ")}
-//         </div>
-//       ))}
-
-//       <button
-//         onClick={() => {
-//           localStorage.clear();
-//           setUser(null);
-//         }}
-//         className="mt-6 bg-red-600 px-4 py-2 rounded"
-//       >
-//         Logout
-//       </button>
-//     </div>
-//   );
-// }
-
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const API = "http://localhost:5000";
+// const API = "http://localhost:5000";
+const API = "https://chat-back-1-s6lt.onrender.com";
 
 export default function AdminPanel({ setUser }) {
   const [users, setUsers] = useState([]);
-  const [roomInput, setRoomInput] = useState({});
+  const [rooms, setRooms] = useState([]);
 
-  // new user form
-  const [form, setForm] = useState({
+  // create user form
+  const [userForm, setUserForm] = useState({
     username: "",
     name: "",
     password: "",
-    rooms: "",
   });
+
+  // create room form
+  const [roomForm, setRoomForm] = useState({
+    roomId: "",
+    passcode: "",
+  });
+
+  // assign room
+  const [assign, setAssign] = useState({
+    username: "",
+    roomId: "",
+  });
+
+  /* ---------------- LOAD DATA ---------------- */
 
   const loadUsers = async () => {
     const res = await axios.get(`${API}/admin/users`);
     setUsers(res.data);
   };
 
+  const loadRooms = async () => {
+    const res = await axios.get(`${API}/admin/rooms`);
+    setRooms(res.data);
+  };
+
   useEffect(() => {
     loadUsers();
+    loadRooms();
   }, []);
 
+  /* ---------------- CREATE USER ---------------- */
+
   const createUser = async () => {
-    if (!form.username || !form.password) {
+    if (!userForm.username || !userForm.password) {
       alert("Username & password required");
       return;
     }
 
-    await axios.post(`${API}/admin/create-user`, {
-      username: form.username,
-      name: form.name,
-      password: form.password,
-      rooms: form.rooms
-        .split(",")
-        .map((r) => r.trim())
-        .filter(Boolean),
-    });
-
-    setForm({ username: "", name: "", password: "", rooms: "" });
+    await axios.post(`${API}/admin/create-user`, userForm);
+    setUserForm({ username: "", name: "", password: "" });
     loadUsers();
   };
 
-  const addRoom = async (username) => {
-    if (!roomInput[username]) return;
+  /* ---------------- CREATE ROOM ---------------- */
 
-    await axios.post(`${API}/admin/add-room`, {
-      username,
-      roomId: roomInput[username],
-    });
+  const createRoom = async () => {
+    if (!roomForm.roomId || !roomForm.passcode) {
+      alert("Room ID & passcode required");
+      return;
+    }
 
-    setRoomInput({ ...roomInput, [username]: "" });
+    await axios.post(`${API}/admin/create-room`, roomForm);
+    setRoomForm({ roomId: "", passcode: "" });
+    loadRooms();
+  };
+
+  /* ---------------- ASSIGN ROOM ---------------- */
+
+  const assignRoom = async () => {
+    if (!assign.username || !assign.roomId) {
+      alert("Select user & room");
+      return;
+    }
+
+    await axios.post(`${API}/admin/assign-room`, assign);
+    setAssign({ username: "", roomId: "" });
     loadUsers();
   };
+
+  /* ---------------- UI ---------------- */
 
   return (
-    <div className="h-screen bg-gray-900 p-6 text-white overflow-auto">
-      <h2 className="text-2xl mb-4">Admin Panel</h2>
+    <div className="h-screen bg-gray-900 text-white p-6 overflow-auto">
+      <h2 className="text-2xl mb-6">Admin Panel</h2>
 
       {/* 🔹 CREATE USER */}
       <div className="bg-gray-800 p-4 rounded mb-6">
-        <h3 className="mb-3 font-semibold">Create New User</h3>
+        <h3 className="mb-3 font-semibold">Create User</h3>
 
-        {["username", "name", "password", "rooms"].map((f) => (
+        {["username", "name", "password"].map((f) => (
           <input
             key={f}
-            value={form[f]}
+            value={userForm[f]}
             onChange={(e) =>
-              setForm({ ...form, [f]: e.target.value })
+              setUserForm({ ...userForm, [f]: e.target.value })
             }
-            placeholder={
-              f === "rooms"
-                ? "Rooms (comma separated)"
-                : f
-            }
+            placeholder={f}
+            type={f === "password" ? "password" : "text"}
             className="block w-full mb-2 p-2 text-black rounded"
           />
         ))}
@@ -220,41 +114,91 @@ export default function AdminPanel({ setUser }) {
         </button>
       </div>
 
-      {/* 🔹 USER LIST */}
-      <h3 className="mb-3 font-semibold">Users</h3>
+      {/* 🔹 CREATE ROOM */}
+      <div className="bg-gray-800 p-4 rounded mb-6">
+        <h3 className="mb-3 font-semibold">Create Room</h3>
 
-      {users.map((u) => (
-        <div
-          key={u.username}
-          className="bg-gray-800 p-3 mb-3 rounded"
+        <input
+          value={roomForm.roomId}
+          onChange={(e) =>
+            setRoomForm({ ...roomForm, roomId: e.target.value })
+          }
+          placeholder="Room ID"
+          className="block w-full mb-2 p-2 text-black rounded"
+        />
+
+        <input
+          value={roomForm.passcode}
+          onChange={(e) =>
+            setRoomForm({ ...roomForm, passcode: e.target.value })
+          }
+          placeholder="Room Passcode"
+          className="block w-full mb-2 p-2 text-black rounded"
+        />
+
+        <button
+          onClick={createRoom}
+          className="bg-blue-600 px-4 py-2 rounded"
         >
-          <p className="font-semibold">{u.username}</p>
-          <p className="text-sm">
-            Rooms: {Array.isArray(u.rooms) && u.rooms.length > 0 ? u.rooms.join(", ") : "None"}
-          </p>
+          Create Room
+        </button>
+      </div>
 
-          <div className="flex gap-2 mt-2">
-            <input
-              placeholder="Add room"
-              className="p-1 text-black rounded"
-              value={roomInput[u.username] || ""}
-              onChange={(e) =>
-                setRoomInput({
-                  ...roomInput,
-                  [u.username]: e.target.value,
-                })
-              }
-            />
-            <button
-              onClick={() => addRoom(u.username)}
-              className="bg-blue-600 px-3 rounded"
-            >
-              Add
-            </button>
+      {/* 🔹 ASSIGN ROOM */}
+      <div className="bg-gray-800 p-4 rounded mb-6">
+        <h3 className="mb-3 font-semibold">Assign Room to User</h3>
+
+        <select
+          value={assign.username}
+          onChange={(e) =>
+            setAssign({ ...assign, username: e.target.value })
+          }
+          className="block w-full mb-2 p-2 text-black rounded"
+        >
+          <option value="">Select User</option>
+          {users.map((u) => (
+            <option key={u.username} value={u.username}>
+              {u.username}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={assign.roomId}
+          onChange={(e) =>
+            setAssign({ ...assign, roomId: e.target.value })
+          }
+          className="block w-full mb-2 p-2 text-black rounded"
+        >
+          <option value="">Select Room</option>
+          {rooms.map((r) => (
+            <option key={r.roomId} value={r.roomId}>
+              {r.roomId}
+            </option>
+          ))}
+        </select>
+
+        <button
+          onClick={assignRoom}
+          className="bg-purple-600 px-4 py-2 rounded"
+        >
+          Assign Room
+        </button>
+      </div>
+
+      {/* 🔹 USERS LIST */}
+      <div className="bg-gray-800 p-4 rounded">
+        <h3 className="mb-3 font-semibold">Users</h3>
+
+        {users.map((u) => (
+          <div key={u.username} className="mb-2">
+            <b>{u.username}</b> →{" "}
+            {u.rooms.length > 0 ? u.rooms.join(", ") : "No rooms"}
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
+      {/* 🔹 LOGOUT */}
       <button
         onClick={() => {
           localStorage.clear();
