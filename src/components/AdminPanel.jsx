@@ -230,7 +230,7 @@ export default function AdminPanel({ setUser }) {
         >
           <p className="font-semibold">{u.username}</p>
           <p className="text-sm">
-            Rooms: {u.rooms.join(", ") || "None"}
+            Rooms: {Array.isArray(u.rooms) && u.rooms.length > 0 ? u.rooms.join(", ") : "None"}
           </p>
 
           <div className="flex gap-2 mt-2">
